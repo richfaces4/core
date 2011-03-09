@@ -35,13 +35,11 @@ import javax.faces.context.FacesContext;
 public interface CacheFactory {
 
     /**
-     * creates a new implementation specific Cache object using the env parameters.
-     * @param env implementation specific environment parameters passed to the
-     * CacheFactory.
-     * @param cacheLoader implementation of the {@link CacheLoader} to use
-     * @param cacheConfigurationloader TODO
+     * Creates a new implementation specific Cache object using the env parameters.
+     * @param facesContext
+     * @param cacheName
+     * @param env
      * @return an implementation specific Cache object.
-     * @throws CacheException if any error occurs.
      */
     public Cache createCache(FacesContext facesContext, String cacheName, Map<?, ?> env);
 
