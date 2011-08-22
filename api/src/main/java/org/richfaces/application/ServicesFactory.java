@@ -20,20 +20,43 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
  */
-
 package org.richfaces.application;
 
 /**
- * <p class="changed_added_4_0"></p>
+ * <p class="changed_added_4_0">
+ * </p>
+ *
  * @author asmirnov@exadel.com
  *
  */
 public interface ServicesFactory {
-    
-    public <T> T getInstance(Class<T> type) throws ServiceException;
+    /**
+     * <p class="changed_added_4_0">
+     * Get service instance associated with given type, usually service interface or base abstract class.
+     * </p>
+     *
+     * @param <T> service type.
+     * @param type Base class implemented by service.
+     * @return Current service implementation.
+     * @throws ServiceException if factory cannot create requested service.
+     */
+    <T> T getInstance(Class<T> type) throws ServiceException;
 
-    public <T> void setInstance(Class<T> type, T instance);
-    
-    public void release();
+    /**
+     * <p class="changed_added_4_0">
+     * Associate concrete instance with service.
+     * </p>
+     *
+     * @param <T> service type.
+     * @param type Base class implemented by service.
+     * @param instance service instance.
+     */
+    <T> void setInstance(Class<T> type, T instance);
 
+    /**
+     * <p class="changed_added_4_0">
+     * Release all services.
+     * </p>
+     */
+    void release();
 }

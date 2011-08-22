@@ -18,15 +18,11 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
  */
-
-
-
 package org.ajax4jsf.javascript;
 
 import java.io.IOException;
 
 import javax.faces.FacesException;
-
 
 /**
  * @author shura (latest modification by $Author: alexsmirnov $)
@@ -34,6 +30,19 @@ import javax.faces.FacesException;
  *
  */
 public abstract class ScriptStringBase implements ScriptString {
+    public static final String FUNCTION = "function";
+    public static final String EQUALS = "=";
+    public static final String DOT = ".";
+    public static final String COMMA = ",";
+    public static final String EMPTY_STRING = " ";
+    public static final String LEFT_CURLY_BRACKET = "{";
+    public static final String RIGHT_CURLY_BRACKET = "}";
+    public static final String LEFT_ROUND_BRACKET = "(";
+    public static final String RIGHT_ROUND_BRACKET = ")";
+    public static final String LEFT_SQUARE_BRACKET = "[";
+    public static final String RIGHT_SQUARE_BRACKET = "]";
+    public static final String COLON = ":";
+
     public String toScript() {
         StringBuilder builder = new StringBuilder();
 
@@ -49,16 +58,16 @@ public abstract class ScriptStringBase implements ScriptString {
         try {
             appendScript(stringBuilder);
         } catch (IOException e) {
-            //ignore
+            // ignore
         }
     }
-    
+
     /*
-     *  (non-Javadoc)
+     * (non-Javadoc)
+     *
      * @see java.lang.Object#toString()
      */
     public String toString() {
         return toScript();
     }
-
 }

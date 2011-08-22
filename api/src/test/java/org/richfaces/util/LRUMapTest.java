@@ -18,15 +18,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
  */
-
-
-
 package org.richfaces.util;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
-
-import org.richfaces.util.LRUMap;
 
 import junit.framework.TestCase;
 
@@ -35,7 +30,6 @@ import junit.framework.TestCase;
  *
  */
 public class LRUMapTest extends TestCase {
-
     /**
      * @param name
      */
@@ -44,7 +38,8 @@ public class LRUMapTest extends TestCase {
     }
 
     /*
-     *  (non-Javadoc)
+     * (non-Javadoc)
+     *
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {
@@ -52,7 +47,8 @@ public class LRUMapTest extends TestCase {
     }
 
     /*
-     *  (non-Javadoc)
+     * (non-Javadoc)
+     *
      * @see junit.framework.TestCase#tearDown()
      */
     protected void tearDown() throws Exception {
@@ -112,5 +108,4 @@ public class LRUMapTest extends TestCase {
 
         assertFalse(iterator.hasNext());
     }
-
 }

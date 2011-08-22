@@ -21,13 +21,13 @@
  */
 package org.richfaces.application.push;
 
+import java.util.EventListener;
 
 /**
  * @author Nick Belaevski
- * 
+ *
  */
 public class SessionSubscriptionEvent extends SessionTopicEvent {
-
     private static final long serialVersionUID = -463481692840464586L;
 
     public SessionSubscriptionEvent(Topic topic, TopicKey topicKey, Session session) {
@@ -35,7 +35,7 @@ public class SessionSubscriptionEvent extends SessionTopicEvent {
     }
 
     @Override
-    public void invokeListener(TopicListener listener) throws EventAbortedException {
-        ((SessionTopicListener) listener).processSubscriptionEvent(this);
+    public void invokeListener(EventListener listener) {
+        ((SessionTopicListener2) listener).processSubscriptionEvent(this);
     }
 }

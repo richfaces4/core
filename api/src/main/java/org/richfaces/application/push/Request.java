@@ -21,30 +21,22 @@
  */
 package org.richfaces.application.push;
 
-import java.io.IOException;
-
-
 /**
  * @author Nick Belaevski
- * 
+ *
  */
 public interface Request {
 
-    //TODO expose request/session/application maps
-    
-    public void flushMessages() throws IOException;
-    
-    //TODO suspend with timeout?
-    public void suspend() throws IOException;
-   
-    public void resume() throws IOException;
+    // TODO expose request/session/application maps
 
-    public Session getSession();
-    
-    public boolean isSuspended();
- 
-    public boolean isPolling();
-    
-    public MessageListener getMessageListener();
-    
+    // TODO suspend with timeout?
+    void suspend();
+
+    void resume();
+
+    Session getSession();
+
+    boolean isPolling();
+
+    void postMessages();
 }

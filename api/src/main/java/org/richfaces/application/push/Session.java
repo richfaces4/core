@@ -21,34 +21,35 @@
  */
 package org.richfaces.application.push;
 
+import java.util.Collection;
 import java.util.Map;
-
-import com.google.common.collect.Multimap;
-
-
 
 /**
  * @author Nick Belaevski
- * 
+ *
  */
 public interface Session {
+    int getMaxInactiveInterval();
 
-    public int getMaxInactiveInterval();
-    
-    public long getLastAccessedTime();
-    
-    public String getId();
-    
-    public Multimap<TopicKey, TopicKey> getSuccessfulSubscriptions();
-    
-    public Map<TopicKey, String> getFailedSubscriptions();
+    long getLastAccessedTime();
 
-    public void subscribe(String[] topics);
-    
-    public void connect(Request request) throws Exception;
-    
-    public void disconnect() throws Exception;
-    
-    public void invalidate();
+    String getId();
 
+    Collection<TopicKey> getSuccessfulSubscriptions();
+
+    Map<TopicKey, String> getFailedSubscriptions();
+
+    void subscribe(String[] topics);
+
+    void connect(Request request) throws Exception;
+
+    void disconnect() throws Exception;
+
+    void invalidate();
+
+    void push(TopicKey topicKey, String serializedData);
+
+    Collection<MessageData> getMessages();
+
+    void clearBroadcastedMessages(long sequenceNumber);
 }
