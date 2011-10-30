@@ -20,6 +20,17 @@
  */
 package org.richfaces.el.util;
 
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorManager;
+import java.text.MessageFormat;
+
+import javax.el.ELContext;
+import javax.el.ExpressionFactory;
+import javax.el.ValueExpression;
+import javax.faces.context.FacesContext;
+
+import com.google.common.primitives.Primitives;
+
 /**
  * @author asmirnov
  */
@@ -52,5 +63,110 @@ public final class ELUtils {
         }
 
         return false;
+    }
+
+    /**
+     * Create a <code>ValueExpression</code> with the expected type of <code>Object.class</code>
+     *
+     * @param expression an EL expression
+     * @return a new <code>ValueExpression</code> instance based off the provided <code>valueRef</code>
+     */
+    public static ValueExpression createValueExpression(String expression) {
+
+        return createValueExpression(expression, Object.class);
+    }
+
+    /**
+     * Creates value expression from string and stores expression's expected type
+     *
+     * @param expression string with EL expressions
+     * @param expectedType the type expected from expression after evaluation
+     * @return value expression from string and stores expression's expected type
+     */
+    public static ValueExpression createValueExpression(String expression, Class<?> expectedType) {
+        FacesContext context = FacesContext.getCurrentInstance();
+        return context.getApplication().getExpressionFactory()
+                .createValueExpression(context.getELContext(), expression, expectedType);
+    }
+
+    public static Object evaluateValueExpression(ValueExpression expression, ELContext elContext) {
+        if (expression.isLiteralText()) {
+            return expression.getExpressionString();
+        } else {
+            return expression.getValue(elContext);
+        }
+    }
+
+    /**
+     * <p>
+     * Creates value expression from string and stores expression's expected type.
+     * </p>
+     *
+     * <p>
+     * If the literal is provided, constant value expression is used instead.
+     * </p>
+     *
+     * @param context current {@link FacesContext}
+     * @param expression string with EL expressions
+     * @param literal determined if the literal value is required
+     * @param expectedType the type expected from expression after evaluation
+     * @return value expression from string and stores expression's expected type
+     */
+    public static ValueExpression createValueExpression(FacesContext context, String expression, boolean literal,
+            Class<?> expectedType) {
+
+        ValueExpression result = null;
+
+        if (!literal && ELUtils.isValueReference(expression)) {
+            ExpressionFactory expressionFactory = context.getApplication().getExpressionFactory();
+
+            if (expressionFactory == null) {
+                throw new IllegalStateException("ExpressionFactory is null");
+            }
+
+            result = expressionFactory.createValueExpression(context.getELContext(), expression, expectedType);
+        } else {
+            Object coercedValue = coerce(expression, expectedType);
+            if (coercedValue != null) {
+                result = new ConstantValueExpression(coercedValue);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Coerce the given object to targetType.
+     *
+     * @param value object to be coerced
+     * @param targetType which should be object coerced into
+     * @return the given value coerced to targetType
+     */
+    public static <T> T coerce(Object value, Class<T> targetType) {
+        if (value == null) {
+            return null;
+        }
+
+        if (targetType.isInstance(value)) {
+            return targetType.cast(value);
+        }
+
+        if (value instanceof String) {
+            PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
+            if (editor == null && Primitives.isWrapperType(targetType)) {
+                editor = PropertyEditorManager.findEditor(Primitives.unwrap(targetType));
+            }
+
+            if (editor != null) {
+
+                editor.setAsText((String) value);
+                return targetType.cast(editor.getValue());
+            } else if (targetType.isEnum()) {
+                return targetType.cast(Enum.valueOf((Class<Enum>) targetType, (String) value));
+            }
+        }
+
+        throw new IllegalArgumentException(MessageFormat.format("Cannot convert {0} to object of {1} type", value,
+                targetType.getName()));
     }
 }

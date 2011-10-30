@@ -37,7 +37,9 @@ import org.richfaces.application.DependencyInjector;
 import org.richfaces.application.ServiceTracker;
 import org.richfaces.log.Logger;
 import org.richfaces.log.RichfacesLogger;
+import org.richfaces.util.LazyLoadingObject;
 import org.richfaces.util.PropertiesUtil;
+import org.richfaces.util.URLUtils;
 import org.richfaces.util.Util;
 
 import com.google.common.base.Function;
@@ -63,7 +65,14 @@ public class ResourceFactoryImpl implements ResourceFactory {
 
         public Resource createResource() {
             FacesContext facesContext = FacesContext.getCurrentInstance();
-            ExternalStaticResource resource = new ExternalStaticResource(resourceLocation, skinDependent);
+            Resource resource;
+
+            // checks that provided resourceLocation is valid URL = then it is considered absolute URL
+            if (URLUtils.isValidURL(resourceLocation)) {
+                resource = new AbsoluteRequestPathResource(resourceLocation);
+            } else {
+                resource = new ExternalStaticResource(resourceLocation, skinDependent);
+            }
 
             resource.setResourceName(resourceKey.getResourceName());
             resource.setLibraryName(resourceKey.getLibraryName());
@@ -123,10 +132,10 @@ public class ResourceFactoryImpl implements ResourceFactory {
         super();
 
         this.defaultHandler = defaultHandler;
-
-        this.externalStaticResourceFactories = readMappings(EXTERNAL_MAPPINGS_FACTORY_PRODUCER,
-            ResourceFactory.STATIC_RESOURCE_MAPPINGS);
         this.mappedResourceDataMap = readMappings(DYNAMIC_MAPPINGS_DATA_PRODUCER, ResourceFactory.DYNAMIC_RESOURCE_MAPPINGS);
+
+        // needs to be loaded lazily on first usage since reads ConfigurationService internally
+        this.externalStaticResourceFactories = new ExternalStaticResourceFactories().getLazilyLoaded();
     }
 
     private static String extractParametersFromResourceName(String resourceName) {
@@ -171,7 +180,7 @@ public class ResourceFactoryImpl implements ResourceFactory {
 
     private Resource createCompiledCSSResource(ResourceKey resourceKey) {
         Resource sourceResource = defaultHandler.createResource(resourceKey.getResourceName(), resourceKey.getLibraryName(),
-            "text/plain");
+                "text/plain");
         if (sourceResource != null) {
             return new CompiledCSSResource(sourceResource);
         }
@@ -217,16 +226,14 @@ public class ResourceFactoryImpl implements ResourceFactory {
         if (!checkResult) {
             DynamicResource dynamicResource = loadedClass.getAnnotation(DynamicResource.class);
             if (dynamicResource != null) {
-                LOGGER
-                    .debug(MessageFormat.format("Dynamic resource annotation is present on resource class {0}", resourceName));
+                LOGGER.debug(MessageFormat.format("Dynamic resource annotation is present on resource class {0}", resourceName));
 
                 checkResult = true;
             }
         }
 
         if (!checkResult) {
-            LOGGER
-                .debug(MessageFormat.format("Dynamic resource annotation is not present on resource class {0}", resourceName));
+            LOGGER.debug(MessageFormat.format("Dynamic resource annotation is not present on resource class {0}", resourceName));
 
             checkResult = checkResourceMarker(resourceName);
         }
@@ -260,8 +267,7 @@ public class ResourceFactoryImpl implements ResourceFactory {
 
             checkResult = true;
         } else {
-            LOGGER
-                .debug(MessageFormat.format("Dynamic resource annotation is not present on resource class {0}", resourceName));
+            LOGGER.debug(MessageFormat.format("Dynamic resource annotation is not present on resource class {0}", resourceName));
         }
 
         if (!checkResult) {
@@ -281,7 +287,8 @@ public class ResourceFactoryImpl implements ResourceFactory {
     /**
      * Should be called only if {@link #isResourceExists(String)} returns <code>true</code>
      *
-     * @param resourceName
+     * @param resourceKey
+     * @param parameters
      * @return
      */
     protected Resource createHandlerDependentResource(ResourceKey resourceKey, Map<String, String> parameters) {
@@ -371,7 +378,7 @@ public class ResourceFactoryImpl implements ResourceFactory {
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(MessageFormat.format("Client requested {0} version of resource, server has {1} version",
-                    String.valueOf(requestedVersion), String.valueOf(existingVersion)));
+                        String.valueOf(requestedVersion), String.valueOf(existingVersion)));
             }
 
             if ((existingVersion != null) && (requestedVersion != null) && !existingVersion.equals(requestedVersion)) {
@@ -399,10 +406,36 @@ public class ResourceFactoryImpl implements ResourceFactory {
         ResourceKey resourceKey = new ResourceKey(resourceName, libraryName);
         ExternalStaticResourceFactory externalStaticResourceFactory = externalStaticResourceFactories.get(resourceKey);
         if (externalStaticResourceFactory != null) {
+            addResourcesToContextMap(externalStaticResourceFactory);
             return externalStaticResourceFactory.createResource();
         }
-
         return createDynamicResource(resourceKey, true);
+    }
+
+    private void addResourcesToContextMap(ExternalStaticResourceFactory externalStaticResourceFactory) {
+        FacesContext facesContext = FacesContext.getCurrentInstance();
+        Map<Object, Object> contextMap = facesContext.getAttributes();
+        for (Entry<ResourceKey, ExternalStaticResourceFactory> entry : externalStaticResourceFactories.entrySet()) {
+            ExternalStaticResourceFactory externalStaticResourceFactoryLoop = entry.getValue();
+            if (externalStaticResourceFactory.resourceLocation.equals(externalStaticResourceFactoryLoop.resourceLocation)) {
+                ResourceKey resourceKeyLoop = entry.getKey();
+                String resourceName = resourceKeyLoop.getResourceName();
+                String libraryName = resourceKeyLoop.getLibraryName();
+                String key = resourceName + libraryName;
+                if (!contextMap.containsKey(key)) { // stylesheets (with this name + library) will not be rendered multiple
+                                                    // times per request
+                    contextMap.put(key, Boolean.TRUE);
+                }
+                if (libraryName == null || libraryName.isEmpty()) { // also store this in the context map with library as "null"
+                    libraryName = "null";
+                    key = resourceName + libraryName;
+                    if (!contextMap.containsKey(key)) {
+                        contextMap.put(key, Boolean.TRUE);
+                    }
+                }
+            }
+
+        }
     }
 
     protected Resource createDynamicResource(ResourceKey resourceKey, boolean useDependencyInjection) {
@@ -438,7 +471,7 @@ public class ResourceFactoryImpl implements ResourceFactory {
         if (result != null) {
             result.setLibraryName(resourceKey.getLibraryName());
             result.setResourceName(resourceKey.getResourceName());
-        } else if (mappedResourceData == null) {
+        } else if (mappedResourceData != null) {
             result = defaultHandler.createResource(actualKey.getResourceName(), actualKey.getLibraryName());
         }
 
@@ -466,5 +499,21 @@ public class ResourceFactoryImpl implements ResourceFactory {
         boolean versioned = isVersionedSet(resource.getClass());
 
         return new UserResourceWrapperImpl(resource, cacheable, versioned);
+    }
+
+    private class ExternalStaticResourceFactories extends LazyLoadingObject<Map<ResourceKey, ExternalStaticResourceFactory>> {
+
+        public ExternalStaticResourceFactories() {
+            super(Map.class);
+        }
+
+        @Override
+        protected Map<ResourceKey, ExternalStaticResourceFactory> loadData() {
+            if (!ResourceMappingConfiguration.isEnabled()) {
+                return Maps.newHashMap();
+            }
+            String mappingLocation = ResourceMappingFeature.getMappingFile();
+            return readMappings(EXTERNAL_MAPPINGS_FACTORY_PRODUCER, mappingLocation);
+        }
     }
 }

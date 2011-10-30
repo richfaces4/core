@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.richfaces.core</groupId>
         <artifactId>richfaces-core-parent</artifactId>
-        <version>4.1.0.20110910-M2</version>
+        <version>4.1.0.20111014-M3</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -67,6 +67,12 @@
         <dependency>
             <groupId>javax.servlet.jsp.jstl</groupId>
             <artifactId>jstl-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.0-SP4</version>
             <scope>provided</scope>
         </dependency>
 
@@ -165,6 +171,7 @@
                         <manifestEntries>
                             <SCM-Revision>${buildNumber}</SCM-Revision>
                             <SCM-Timestamp>${timestamp}</SCM-Timestamp>
+                            <Dependencies>org.w3c.css.sac,net.sourceforge.cssparser</Dependencies>
                         </manifestEntries>
                     </archive>
                 </configuration>

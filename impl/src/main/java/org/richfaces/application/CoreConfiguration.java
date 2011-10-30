@@ -59,8 +59,19 @@ public final class CoreConfiguration {
         resourcesDefaultVersion,
         @ConfigurationItem(names = "org.ajax4jsf.cache.LRU_MAP_CACHE_SIZE", literal = true)
         lruMapCacheSize,
+        @Deprecated
         @ConfigurationItem(names = "org.richfaces.staticResourceLocation")
         staticResourceLocation,
+        @ConfigurationItem(defaultValue = "false", names = "org.richfaces.resourceMapping.enabled", literal = true)
+        resourceMappingEnabled,
+        @ConfigurationItem(names = "org.richfaces.resourceMapping.location", literal = true)
+        resourceMappingLocation,
+        @ConfigurationItem(names = "org.richfaces.resourceMapping.mappingFile")
+        resourceMappingFile,
+        @ConfigurationItem(defaultValue = "Production,SystemTest", names = "org.richfaces.resourceMapping.compressedStages", literal = true)
+        resourceMappingCompressedStages,
+        @ConfigurationItem(defaultValue = "All", names = "org.richfaces.resourceMapping.packedStages", literal = true)
+        resourceMappingPackedStages,
         @ConfigurationItem(defaultValue = "true", names = "org.richfaces.executeAWTInitializer", literal = true)
         executeAWTInitializer,
         @ConfigurationItem(names = "org.richfaces.push.handlerMapping", literal = true)
