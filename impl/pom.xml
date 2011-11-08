@@ -20,12 +20,11 @@
     <parent>
         <groupId>org.richfaces.core</groupId>
         <artifactId>richfaces-core-parent</artifactId>
-        <version>4.1.0.20111014-M3</version>
+        <version>4.1.0-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.richfaces.core</groupId>
     <artifactId>richfaces-core-impl</artifactId>
     <name>RichFaces Core Implementation</name>
 
