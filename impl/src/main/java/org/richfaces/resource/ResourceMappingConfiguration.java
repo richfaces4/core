@@ -41,21 +41,9 @@ import org.richfaces.log.RichfacesLogger;
  */
 public final class ResourceMappingConfiguration {
 
+    static final String DEFAULT_STATIC_RESOURCE_MAPPING_LOCATION = "META-INF/richfaces/static-resource-mappings.properties";
     private static final Logger LOG = RichfacesLogger.CONFIG.getLogger();
     private static final String STATIC_RESOURCE_DEPRECATION_LOGGED = "org.richfaces.staticResourceLocation.deprecation.logged";
-
-    /**
-     * Returns true if resource mapping feature is enabled in configuration.
-     *
-     * @return true if resource mapping feature is enabled in configuration; false otherwise
-     */
-    static boolean isEnabled() {
-        if (getStaticResourceLocation() != null) {
-            return true;
-        }
-        return ConfigurationServiceHelper.getBooleanConfigurationValue(FacesContext.getCurrentInstance(),
-                CoreConfiguration.Items.resourceMappingEnabled);
-    }
 
     /**
      * Returns configured location for resource mapping
@@ -76,7 +64,7 @@ public final class ResourceMappingConfiguration {
      */
     static String getResourceMappingFile() {
         if (getStaticResourceLocation() != null) {
-            return "META-INF/richfaces/static-resource-mappings.properties";
+            return DEFAULT_STATIC_RESOURCE_MAPPING_LOCATION;
         }
         return getConfiguration(CoreConfiguration.Items.resourceMappingFile);
     }

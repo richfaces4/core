@@ -62,24 +62,24 @@ public final class CoreConfiguration {
         @Deprecated
         @ConfigurationItem(names = "org.richfaces.staticResourceLocation")
         staticResourceLocation,
-        @ConfigurationItem(defaultValue = "false", names = "org.richfaces.resourceMapping.enabled", literal = true)
-        resourceMappingEnabled,
         @ConfigurationItem(names = "org.richfaces.resourceMapping.location", literal = true)
         resourceMappingLocation,
         @ConfigurationItem(names = "org.richfaces.resourceMapping.mappingFile")
         resourceMappingFile,
-        @ConfigurationItem(defaultValue = "Production,SystemTest", names = "org.richfaces.resourceMapping.compressedStages", literal = true)
-        resourceMappingCompressedStages,
-        @ConfigurationItem(defaultValue = "All", names = "org.richfaces.resourceMapping.packedStages", literal = true)
-        resourceMappingPackedStages,
+        @ConfigurationItem(defaultValue = "false", names = { "org.richfaces.resourceOptimization.enabled", "org.richfaces.resourceMapping.enabled" }, literal = true)
+        resourceOptimizationEnabled,
+        @ConfigurationItem(defaultValue = "Production,SystemTest", names = { "org.richfaces.resourceOptimization.compressionStages", "org.richfaces.resourceMapping.compressedStages" }, literal = true)
+        resourceOptimizationCompressionStages,
+        @ConfigurationItem(defaultValue = "All", names = { "org.richfaces.resourceOptimization.packagingStages", "org.richfaces.resourceMapping.packedStages" }, literal = true)
+        resourceOptimizationPackagingStages,
         @ConfigurationItem(defaultValue = "true", names = "org.richfaces.executeAWTInitializer", literal = true)
         executeAWTInitializer,
         @ConfigurationItem(names = "org.richfaces.push.handlerMapping", literal = true)
         pushHandlerMapping,
         @ConfigurationItem(defaultValue = "/ConnectionFactory", names = "org.richfaces.push.jms.connectionFactory")
         pushJMSConnectionFactory,
-        @ConfigurationItem(defaultValue = "false", names = "org.richfaces.push.jms.disable")
-        pushJMSDisable,
+        @ConfigurationItem(defaultValue = "", names = "org.richfaces.push.jms.enabled")
+        pushJMSEnabled,
         @ConfigurationItem(defaultValue = "/topic", names = "org.richfaces.push.jms.topicsNamespace")
         pushJMSTopicsNamespace,
         @ConfigurationItem(defaultValue = "", names = "org.richfaces.push.jms.connectionUsername")
@@ -89,7 +89,9 @@ public final class CoreConfiguration {
         @ConfigurationItem(defaultValue = "", names = "org.richfaces.push.jms.connectionPassword")
         pushJMSConnectionPassword,
         @ConfigurationItem(defaultValue = "", names = "org.richfaces.push.jms.connectionPassword", source = ConfigurationItemSource.webEnvironmentEntry)
-        pushJMSConnectionPasswordEnvRef
+        pushJMSConnectionPasswordEnvRef,
+        @ConfigurationItem(defaultValue = "false", names="org.richfaces.push.initializeOnStartup")
+        pushInitializePushContextOnStartup
 
     }
 

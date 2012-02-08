@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.richfaces.core</groupId>
         <artifactId>richfaces-core-parent</artifactId>
-        <version>4.1.0.Final</version>
+        <version>4.2.0.CR1</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -54,7 +54,6 @@
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>1</version>
             <scope>provided</scope>
         </dependency>
 

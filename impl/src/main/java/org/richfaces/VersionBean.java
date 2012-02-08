@@ -58,7 +58,7 @@ public final class VersionBean {
         private static final String UNKNOWN = "";
         private String implementationVendor = UNKNOWN;
         // TODO nick - default value for manifest file absense - review
-        private String implementationVersion = "4.1.0.Final";
+        private String implementationVersion = "4.2.0.CR1";
         private String implementationTitle = UNKNOWN;
         private String scmTimestamp = UNKNOWN;
         private String fullVersionString = UNKNOWN;
@@ -114,7 +114,14 @@ public final class VersionBean {
                     if (url != null) {
                         InputStream manifestStream = null;
                         try {
-                            manifestStream = URLToStreamHelper.urlToStream(new URL(url, JarFile.MANIFEST_NAME));
+                            URL manifestFileUrl;
+                            if ("vfs".equals(url.getProtocol())) {
+                                String manifestFile = String.format("%s/%s", url.toExternalForm(), JarFile.MANIFEST_NAME);
+                                manifestFileUrl = new URL(manifestFile);
+                            } else {
+                                manifestFileUrl = new URL(url, JarFile.MANIFEST_NAME);
+                            }
+                            manifestStream = URLToStreamHelper.urlToStream(manifestFileUrl);
                             return new Manifest(manifestStream);
                         } catch (MalformedURLException e1) {
                             // that's ok - just log in debug

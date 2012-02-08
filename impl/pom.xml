@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.richfaces.core</groupId>
         <artifactId>richfaces-core-parent</artifactId>
-        <version>4.1.0.Final</version>
+        <version>4.2.0.CR1</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -71,7 +71,6 @@
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
-            <version>1.0-SP4</version>
             <scope>provided</scope>
         </dependency>
 
@@ -109,11 +108,10 @@
             <groupId>org.jboss.test-jsf</groupId>
             <artifactId>htmlunit-client</artifactId>
             <scope>test</scope>
-
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
-                    <artifactId>servlet-api</artifactId>
+                    <artifactId>javax.servlet-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -130,6 +128,16 @@
         <dependency>
             <groupId>org.easymock</groupId>
             <artifactId>easymockclassextension</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.test-jsf</groupId>
+            <artifactId>jsf-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -170,7 +178,6 @@
                         <manifestEntries>
                             <SCM-Revision>${buildNumber}</SCM-Revision>
                             <SCM-Timestamp>${timestamp}</SCM-Timestamp>
-                            <Dependencies>org.w3c.css.sac,net.sourceforge.cssparser</Dependencies>
                         </manifestEntries>
                     </archive>
                 </configuration>
