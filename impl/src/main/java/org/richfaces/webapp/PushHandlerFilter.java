@@ -22,10 +22,8 @@
 package org.richfaces.webapp;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Collections;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -43,7 +41,6 @@ import org.atmosphere.cpr.Meteor;
 import org.richfaces.application.push.PushContext;
 import org.richfaces.application.push.Request;
 import org.richfaces.application.push.Session;
-import org.richfaces.application.push.SessionManager;
 import org.richfaces.application.push.impl.RequestImpl;
 import org.richfaces.log.Logger;
 import org.richfaces.log.RichfacesLogger;
@@ -54,15 +51,16 @@ import org.richfaces.log.RichfacesLogger;
  * @author Nick Belaevski
  *
  */
-public class PushHandlerFilter implements Filter, Serializable {
+public class PushHandlerFilter implements Filter {
     public static final String SESSION_ATTRIBUTE_NAME = Session.class.getName();
     public static final String REQUEST_ATTRIBUTE_NAME = Request.class.getName();
-    private static final long serialVersionUID = 5724886106704391903L;
     private static final String PUSH_SESSION_ID_PARAM = "pushSessionId";
     private static final Logger LOGGER = RichfacesLogger.WEBAPP.getLogger();
-    private AtomicReference<SessionManager> sessionManagerReference = new AtomicReference<SessionManager>();
+
+    private transient ServletContext servletContext;
 
     public void init(FilterConfig filterConfig) throws ServletException {
+        servletContext = filterConfig.getServletContext();
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
@@ -74,14 +72,15 @@ public class PushHandlerFilter implements Filter, Serializable {
             chain.doFilter(request, response);
 
             if ("GET".equals(httpReq.getMethod())) {
-                Meteor meteor = Meteor.build(httpReq, SCOPE.REQUEST, Collections.<BroadcastFilter>emptyList(), null);
+                Meteor meteor = Meteor.build(httpReq, SCOPE.REQUEST, Collections.<BroadcastFilter> emptyList(), null);
 
                 String pushSessionId = httpReq.getParameter(PUSH_SESSION_ID_PARAM);
 
                 Session session = null;
 
                 if (pushSessionId != null) {
-                    session = getSessionManager(request).getPushSession(pushSessionId);
+                    PushContext pushContext = (PushContext) servletContext.getAttribute(PushContext.INSTANCE_KEY_NAME);
+                    session = pushContext.getSessionManager().getPushSession(pushSessionId);
                 }
 
                 if (session == null) {
@@ -110,24 +109,7 @@ public class PushHandlerFilter implements Filter, Serializable {
         }
     }
 
-    /**
-     * Get instance of {@link SessionManager}.
-     *
-     * Instance of {@link SessionManager} is initialized from Current {@link SessionManager} is stored in
-     * {@link #sessionManagerReference}, since it needs to be initialized lazily.
-     *
-     * It can be initialized by providing {@link ServletRequest}.
-     */
-    private SessionManager getSessionManager(ServletRequest request) {
-        if (sessionManagerReference.get() == null) {
-            ServletContext servletContext = request.getServletContext();
-            PushContext pushContext = (PushContext) servletContext.getAttribute(PushContext.INSTANCE_KEY_NAME);
-            sessionManagerReference.compareAndSet(null, pushContext.getSessionManager());
-        }
-        return sessionManagerReference.get();
-    }
-
     public void destroy() {
-        sessionManagerReference.set(null);
+        servletContext = null;
     }
 }
