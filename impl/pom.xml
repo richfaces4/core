@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.richfaces.core</groupId>
         <artifactId>richfaces-core-parent</artifactId>
-        <version>4.2.0.Final</version>
+        <version>4.2.1.Final</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -99,7 +99,7 @@
         </dependency>
         <dependency>
             <groupId>javax.jms</groupId>
-            <artifactId>jms</artifactId>
+            <artifactId>jms-api</artifactId>
             <optional>true</optional>
         </dependency>
 
