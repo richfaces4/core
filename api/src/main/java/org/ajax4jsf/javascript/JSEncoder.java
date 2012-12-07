@@ -37,10 +37,12 @@ public class JSEncoder {
     private static final char[] ENCODE_TAB = "\\t".toCharArray();
     private static final char[] ENCODE_BS = "\\\\".toCharArray();
     private static final char[] ENCODE_FS = "\\/".toCharArray();
-    private static final char[] ENCODE_HM = "-".toCharArray();
-    private static final char[] ENCODE_RB = "]".toCharArray();
-    private static final char[] ENCODE_LT = "<".toCharArray();
-    private static final char[] ENCODE_GT = ">".toCharArray();
+
+    // frequent  '-' ']' '<' '>' chars
+    private static final char[] ENCODE_HM = "\\u002D".toCharArray();
+    private static final char[] ENCODE_RB = "\\u005D".toCharArray();
+    private static final char[] ENCODE_LT = "\\u003C".toCharArray();
+    private static final char[] ENCODE_GT = "\\u003E".toCharArray();
 
     private static final CharBuffer ENCODE_QUOT_CB = CharBuffer.wrap(ENCODE_QUOT);
     private static final CharBuffer ENCODE_LF_CB = CharBuffer.wrap(ENCODE_LF);
