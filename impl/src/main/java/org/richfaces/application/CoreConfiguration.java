@@ -21,6 +21,7 @@
  */
 package org.richfaces.application;
 
+import org.richfaces.annotation.Experimental;
 import org.richfaces.application.configuration.ConfigurationItem;
 import org.richfaces.application.configuration.ConfigurationItemSource;
 import org.richfaces.application.configuration.ConfigurationItemsBundle;
@@ -91,8 +92,23 @@ public final class CoreConfiguration {
         @ConfigurationItem(defaultValue = "", names = "org.richfaces.push.jms.connectionPassword", source = ConfigurationItemSource.webEnvironmentEntry)
         pushJMSConnectionPasswordEnvRef,
         @ConfigurationItem(defaultValue = "false", names="org.richfaces.push.initializeOnStartup")
-        pushInitializePushContextOnStartup
-
+        pushInitializePushContextOnStartup,
+        /**
+         * The interval of Push session invalidation when inactive (experimental configuration option: RF-12370)
+         */
+        @Experimental
+        @ConfigurationItem(defaultValue = "300000", names="org.richfaces.push.session.maxInactiveInterval")
+        pushSessionMaxInactiveInterval,
+        /**
+         * Whether or not to display the built in sort controls when the sorting attributes are present on a column
+         */
+        @ConfigurationItem(defaultValue = "true", names = "org.richfaces.builtin.sort.enabled")
+        builtInSortControlsEnabled,
+        /**
+         * Whether or not to display the built in filter controls when the filtering attributes are present on a column
+         */
+        @ConfigurationItem(defaultValue = "true", names = "org.richfaces.builtin.filter.enabled")
+        builtInFilterControlsEnabled
     }
 
     @ConfigurationItemsBundle(propertiesFile = "org/richfaces/push.properties")

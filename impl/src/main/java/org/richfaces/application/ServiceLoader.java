@@ -50,7 +50,7 @@ import com.google.common.collect.Iterables;
  */
 public final class ServiceLoader {
     private static final String META_INF_SERVICES = "META-INF/services/";
-    private static final Pattern LEGAL_JAVA_NAME = Pattern.compile("^(([A-Za-z0-9_])+\\.)+[A-Z]([A-Za-z0-9_]*)$");
+    private static final Pattern LEGAL_JAVA_NAME = Pattern.compile("^(([A-Za-z0-9_])+[\\.\\$])+[A-Z]([A-Za-z0-9_]*)$");
 
     private ServiceLoader() {
 
@@ -81,6 +81,15 @@ public final class ServiceLoader {
             return createInstance(Iterables.getLast(serviceClasses));
         } catch (NoSuchElementException e) {
             return createInstance(defaultImplementation);
+        }
+    }
+
+    public static <S> S loadService(Class<S> serviceClass) {
+        Collection<Class<? extends S>> serviceClasses = loadServiceClasses(serviceClass);
+        try {
+            return createInstance(Iterables.getLast(serviceClasses));
+        } catch (NoSuchElementException e) {
+            return null;
         }
     }
 

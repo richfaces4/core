@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.richfaces.core</groupId>
         <artifactId>richfaces-core-parent</artifactId>
-        <version>4.2.2.Final</version>
+        <version>4.3.0.Final</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
@@ -79,6 +79,12 @@
             <groupId>org.jboss.cache</groupId>
             <artifactId>jbosscache-core</artifactId>
             <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jboss-logging-spi</artifactId>
+                    <groupId>org.jboss.logging</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache</groupId>
@@ -143,6 +149,12 @@
     </dependencies>
 
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <!-- Checkstyle only required here because suppressions needed -->
@@ -181,11 +193,39 @@
                         </manifestEntries>
                     </archive>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/integration/**/*.java</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
 
+
     <profiles>
+        
+        <!-- Release -->
         <profile>
             <id>release</id>
             <!-- TODO need to centralize - need to research first -->

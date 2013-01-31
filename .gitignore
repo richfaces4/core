@@ -6,3 +6,10 @@ test-output
 .clover
 .externalToolBuilders
 MANIFEST.MF
+rebel.xml
+
+.factorypath
+
+# Selenium 
+log.txt
+chromedriver.log

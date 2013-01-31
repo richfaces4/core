@@ -31,6 +31,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.faces.FacesException;
 import javax.faces.context.FacesContext;
@@ -123,7 +124,7 @@ public class InitializationListener implements SystemEventListener {
         ServicesFactoryImpl injector = new ServicesFactoryImpl();
         ServiceTracker.setFactory(injector);
         ArrayList<Module> modules = new ArrayList<Module>();
-        modules.add(new DefaultModule());
+        addDefaultModules(modules);
         try {
             modules.addAll(ServiceLoader.loadServices(Module.class));
             injector.init(modules);
@@ -131,6 +132,10 @@ public class InitializationListener implements SystemEventListener {
             throw new FacesException(e);
         }
         return injector;
+    }
+
+    protected void addDefaultModules(List<Module> modules) {
+        modules.add(new DefaultModule());
     }
 
     protected void onStop() {

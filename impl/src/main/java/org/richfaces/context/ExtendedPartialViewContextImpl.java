@@ -257,23 +257,22 @@ public class ExtendedPartialViewContextImpl extends ExtendedPartialViewContext {
             if (isRenderAll()) {
                 renderAll(facesContext, viewRoot);
                 renderState(facesContext);
-                writer.endDocument();
-                return;
+            } else {
+                // Skip this processing if "none" is specified in the render list,
+                // or there were no render phase client ids.
+                if ((phaseIds != null && !phaseIds.isEmpty())
+                    || (!limitRender && PartialViewContextAjaxOutputTracker.hasNestedAjaxOutputs(viewRoot))) {
+
+                    EnumSet<VisitHint> hints = EnumSet.of(VisitHint.SKIP_UNRENDERED);
+                    VisitContext visitContext = new RenderExtendedVisitContext(facesContext, phaseIds, hints, limitRender);
+                    VisitCallback visitCallback = new RenderVisitCallback(facesContext);
+                    viewRoot.visitTree(visitContext, visitCallback);
+                }
+
+                renderState(facesContext);
             }
 
-            // Skip this processing if "none" is specified in the render list,
-            // or there were no render phase client ids.
-            if ((phaseIds != null && !phaseIds.isEmpty())
-                || (!limitRender && PartialViewContextAjaxOutputTracker.hasNestedAjaxOutputs(viewRoot))) {
-
-                EnumSet<VisitHint> hints = EnumSet.of(VisitHint.SKIP_UNRENDERED);
-                VisitContext visitContext = new RenderExtendedVisitContext(facesContext, phaseIds, hints, limitRender);
-                VisitCallback visitCallback = new RenderVisitCallback(facesContext);
-                viewRoot.visitTree(visitContext, visitCallback);
-            }
-
-            renderState(facesContext);
-
+            addJavaScriptServicePageScripts(facesContext, viewRoot);
             // TODO - render extensions for renderAll?
             renderExtensions(facesContext, viewRoot);
 
@@ -307,7 +306,7 @@ public class ExtendedPartialViewContextImpl extends ExtendedPartialViewContext {
     private void visitActivatorAtExecute() {
         ExecuteComponentCallback callback = new ExecuteComponentCallback(getFacesContext(), behaviorEvent);
 
-        if (visitActivatorComponent(activatorComponentId, callback, EnumSet.of(VisitHint.SKIP_UNRENDERED))) {
+        if (visitActivatorComponent(activatorComponentId, callback, EnumSet.noneOf(VisitHint.class))) {
             setupExecuteCallbackData(callback);
 
             if (!executeIds.contains(ALL)) {
@@ -413,15 +412,24 @@ public class ExtendedPartialViewContextImpl extends ExtendedPartialViewContext {
     protected void addImplicitRenderIds(Collection<String> ids, boolean limitRender) {
     }
 
-    protected void renderExtensions(FacesContext context, UIComponent component) throws IOException {
-        // ADD deffered scripts
+    protected void addJavaScriptServicePageScripts(FacesContext context, UIComponent component) {
         ScriptsHolder scriptsHolder = ServiceTracker.getService(JavaScriptService.class).getScriptsHolder(context);
+        StringBuilder scripts = new StringBuilder();
         for (Object script : scriptsHolder.getScripts()) {
-            appendOncomplete(ScriptUtils.toScript(script));
+            scripts.append(ScriptUtils.toScript(script));
+            scripts.append(";");
         }
         for (Object script : scriptsHolder.getPageReadyScripts()) {
-            appendOncomplete(ScriptUtils.toScript(script));
+            scripts.append(ScriptUtils.toScript(script));
+            scripts.append(";");
         }
+        if (scripts.length() > 0) {
+            scripts.append("RichFaces.javascriptServiceComplete();");
+            prependOncomplete(scripts.toString());
+        }
+    }
+
+    protected void renderExtensions(FacesContext context, UIComponent component) throws IOException {
         CoreAjaxRendererUtils.renderAjaxExtensions(context, component);
     }
 

@@ -234,6 +234,8 @@ public final class ScriptUtils {
      */
     public static String toScript(Object obj) {
         StringBuilder sb = new StringBuilder();
+        if ((obj != null) && (obj instanceof String))
+            sb.ensureCapacity((int)(((String) obj).length() * 1.66));
 
         try {
             appendScript(sb, obj, new IdentityHashMap<Object, Boolean>());
@@ -255,20 +257,29 @@ public final class ScriptUtils {
         appendable.append("\"");
     }
 
+
     public static void appendEncoded(Appendable appendable, Object obj) throws IOException {
-        JSEncoder encoder = new JSEncoder();
-        char[] chars = obj.toString().toCharArray();
+        String s = obj.toString();
+        int start = 0;
+        int end = s.length();
 
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
+        for(int i = start; i < end; i++){
+            char c = s.charAt(i);
 
-            if (!encoder.compile(c)) {
-                appendable.append(CharBuffer.wrap(encoder.encode(c)));
-            } else {
-                appendable.append(c);
-            }
-        }
-    }
+            if (JSEncoder.compile(c))
+                continue;
+
+            if (start != i)
+                appendable.append(s, start, i);
+
+            appendable.append(JSEncoder.encodeCharBuffer(c));
+            start = i + 1;
+       }
+
+       if (start != end)
+            appendable.append(s, start, end);
+   }
+
 
     public static String getValidJavascriptName(String script) {
         String s = "av_" + getMD5scriptHash(script);

@@ -58,7 +58,7 @@ public final class VersionBean {
         private static final String UNKNOWN = "";
         private String implementationVendor = UNKNOWN;
         // TODO nick - default value for manifest file absense - review
-        private String implementationVersion = "4.2.2.Final";
+        private String implementationVersion = "4.3.0.Final";
         private String implementationTitle = UNKNOWN;
         private String scmTimestamp = UNKNOWN;
         private String fullVersionString = UNKNOWN;
@@ -102,7 +102,7 @@ public final class VersionBean {
         }
 
         private void initializeDerivativeProperties() {
-            fullVersionString = MessageFormat.format("v.{0}", implementationVersion);
+            fullVersionString = MessageFormat.format("{0}", implementationVersion);
         }
 
         private Manifest readManifest() {

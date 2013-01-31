@@ -13,6 +13,11 @@ if (!window.RichFaces) {
 (function(jQuery, richfaces) {
 
     richfaces.RICH_CONTAINER = "rf";
+    
+    /**
+     * All input elements which can hold value, which are enabled and visible.
+     */
+    richfaces.EDITABLE_INPUT_SELECTOR = ":not(:submit):not(:button):not(:image):input:visible:enabled";
 
     //keys codes
     richfaces.KEYS = {
@@ -30,12 +35,19 @@ if (!window.RichFaces) {
         DOWN: 40,
         DEL: 46
     };
+    
+    if (window.jsf) {
+        var jsfAjaxRequest = jsf.ajax.request;
+        var jsfAjaxResponse = jsf.ajax.response;
+    }
 
     // get DOM element by id or DOM element or jQuery object
     richfaces.getDomElement = function (source) {
         var type = typeof source;
         var element;
-        if (type == "string") {
+        if (source == null) {
+            element = null;
+        } else if (type == "string") {
             // id
             element = document.getElementById(source);
         } else if (type == "object") {
@@ -59,6 +71,16 @@ if (!window.RichFaces) {
             return (element[richfaces.RICH_CONTAINER] || {})["component"];
         }
     };
+    
+
+    /**
+     * jQuery selector ":editable" which selects only input elements which can be edited, are visible and enabled
+     */
+    $.extend($.expr[':'], {
+        editable : function(element) {
+            return $(element).is(richfaces.EDITABLE_INPUT_SELECTOR);
+        }
+    });
 
     richfaces.$$ = function(componentName, element) {
         while (element.parentNode) {
@@ -110,6 +132,9 @@ if (!window.RichFaces) {
             e = jQuery('body').get(0);
         }
         if (e) {
+            // Fire a DOM cleanup event
+//            $(e).trigger("beforeDomClean" + RichFaces.Event.RICH_NAMESPACE);
+            $(e).trigger("beforeDomClean" + ".RICH");
             var elements = e.getElementsByTagName("*");
             if (elements.length) {
                 jQuery.each(elements, function(index) {
@@ -119,6 +144,8 @@ if (!window.RichFaces) {
             }
             richfaces.cleanComponent(e);
             jQuery.cleanData([e]);
+//            $(e).trigger("afterDomClean" + RichFaces.Event.RICH_NAMESPACE);
+            $(e).trigger("afterDomClean" + ".RICH");
         }
     };
 
@@ -166,7 +193,8 @@ if (!window.RichFaces) {
             jQuery(parameterInputs).remove();
         }
     };
-    //
+    
+    
 
     //utils.js
     jQuery.fn.toXML = function () {
@@ -456,7 +484,9 @@ if (!window.RichFaces) {
                 var callResult;
                 for (var i = 0; i < functions.length; i++) {
                     var f = functions[i];
-                    callResult = f.apply(this, arguments);
+                    if (f) {
+                        callResult = f.apply(this, arguments);
+                    }
                 }
 
                 return callResult;
@@ -509,15 +539,18 @@ if (!window.RichFaces) {
     }());
 
     richfaces.ajax = function(source, event, options) {
-        var sourceId;
-        if (options.sourceId) {
-            sourceId = options.sourceId;
-        } else {
-            sourceId = (typeof source == 'object' && source.id) ? source.id : source;
+        var options = options || {};
+        
+        var sourceId = getSourceId(source, options);
+        var sourceElement = getSourceElement(source);
+        var form = getFormElement(sourceElement);
+        
+        // event source re-targeting finds a RichFaces component root
+        // to setup javax.faces.source correctly - RF-12616)
+        if (sourceElement) {
+            source = searchForComponentRootOrReturn(sourceElement);
         }
-
-        options = options || {};
-
+        
         parameters = options.parameters || {}; // TODO: change "parameters" to "richfaces.ajax.params"
         parameters.execute = "@component";
         parameters.render = "@component";
@@ -560,6 +593,13 @@ if (!window.RichFaces) {
                 eventHandlers.begin = namedStatusEventHandler;
             }
         }
+        
+        // trigger form events: ajaxbegin and ajaxbeforedomupdate
+        if (form) {
+            eventHandlers.begin = chain(function() { jQuery(form).trigger('ajaxbegin'); }, eventHandlers.begin);
+            eventHandlers.beforedomupdate = chain(function() { jQuery(form).trigger('ajaxbeforedomupdate'); }, eventHandlers.beforedomupdate);
+            eventHandlers.complete = chain(function() { jQuery(form).trigger('ajaxcomplete'); }, eventHandlers.complete);
+        }
 
         if (options.incId) {
             parameters[sourceId] = sourceId;
@@ -574,8 +614,79 @@ if (!window.RichFaces) {
         if (richfaces.queue) {
             parameters.queueId = options.queueId;
         }
-
+        
         jsf.ajax.request(source, event, parameters);
+    };
+    
+    // triggers form ajaxsubmit event
+    if (window.jsf) {
+        jsf.ajax.request = function request(source, event, options) {
+            var sourceElement = getSourceElement(source);
+            var form = getFormElement(sourceElement);
+            if (form) {
+                jQuery(form).trigger('ajaxsubmit');
+            }
+            return jsfAjaxRequest(source, event, options);
+        }
+        
+        jsf.ajax.response = function(request, context) {
+            // for RichFaces.ajax requests
+            if (context.render == '@component') {
+                // get updated IDs
+                context.render = $("extension[id='org.richfaces.extension'] render", request.responseXML).text();
+            }
+
+            return jsfAjaxResponse(request, context);
+        }
+    }
+    
+    /*
+     * Returns RichFaces component root for given element in the list of ancestors of sourceElement.
+     * Otherwise returns sourceElement if RichFaces component root can't be located.
+     */
+    var searchForComponentRootOrReturn = function(sourceElement) {
+        if (sourceElement.id && !richfaces.$(sourceElement)) {
+            var parentElement = false;
+            jQuery(sourceElement).parents().each(function() {
+                if (this.id && sourceElement.id.indexOf(this.id) == 0) { // otherwise parent element is definitely not JSF component
+                    var suffix = sourceElement.id.substring(this.id.length); // extract suffix
+                    if (suffix.match(/^[a-zA-Z]*$/) && richfaces.$(this)) {
+                        parentElement = this;
+                        return false;
+                    }
+                }
+            });
+            if (parentElement !== false) {
+                return parentElement;
+            }
+        }
+        return sourceElement;
+    };
+    
+    var getSourceElement = function(source) {
+        if (typeof source === 'string') {
+            return document.getElementById(source);
+        } else if (typeof source === 'object') {
+            return source;
+        } else {
+            throw new Error("jsf.request: source must be object or string");
+        }
+    };
+    
+    var getFormElement = function(sourceElement) {
+        if ($(sourceElement).is('form')) {
+            return source;
+        } else {
+            return $('form').has(sourceElement).get(0);
+        }
+    };
+    
+    var getSourceId = function(source, options) {
+        if (options.sourceId) {
+            return options.sourceId;
+        } else {
+            return (typeof source == 'object' && (source.id || source.name)) ? (source.id ? source.id : source.name) : source;
+        }
     };
 
     var ajaxOnComplete = function (data) {
@@ -591,6 +702,12 @@ if (!window.RichFaces) {
                 });
             }
         }
+    };
+    
+    richfaces.javascriptServiceComplete = function(event) {
+        jQuery(function() {
+            jQuery(document).trigger("javascriptServiceComplete");
+        });
     };
 
     var attachAjaxDOMCleaner = function() {
