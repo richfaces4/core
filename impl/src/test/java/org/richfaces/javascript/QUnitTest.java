@@ -27,7 +27,6 @@ import java.util.Iterator;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
@@ -46,7 +45,7 @@ public class QUnitTest {
 
     @Before
     public void setUp() {
-        webClient_ = new WebClient(BrowserVersion.FIREFOX_3_6);
+        webClient_ = new WebClient(BrowserVersion.INTERNET_EXPLORER_8);
     }
 
     @After
