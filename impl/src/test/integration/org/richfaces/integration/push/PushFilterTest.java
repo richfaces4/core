@@ -21,8 +21,8 @@ public class PushFilterTest extends AbstractPushTest {
 
     @Deployment
     public static WebArchive createDeployment() {
-        CoreDeployment deployment = createBasicDeployment();
-        
+        CoreDeployment deployment = createBasicDeployment(PushFilterTest.class);
+
         deployment.webXml(new Function<WebAppDescriptor, WebAppDescriptor>() {
             public WebAppDescriptor apply(WebAppDescriptor webXml) {
                 return webXml
@@ -37,7 +37,7 @@ public class PushFilterTest extends AbstractPushTest {
                         .up();
             }
         });
-        
+
         return deployment.getFinalArchive();
     }
 

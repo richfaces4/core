@@ -15,7 +15,7 @@ public class AutoRegisteredPushServletTest extends AbstractPushTest {
 
     @Deployment
     public static WebArchive createDeployment() {
-        CoreDeployment deployment = createBasicDeployment();
+        CoreDeployment deployment = createBasicDeployment(AutoRegisteredPushServletTest.class);
         return deployment.getFinalArchive();
     }
 

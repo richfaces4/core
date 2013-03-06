@@ -40,9 +40,9 @@ public class AbstractPushTest {
     @ArquillianResource
     URL contextPath;
 
-    public static CoreDeployment createBasicDeployment() {
+    public static CoreDeployment createBasicDeployment(Class<?> testClass) {
 
-        CoreDeployment deployment = new CoreDeployment(null);
+        CoreDeployment deployment = new CoreDeployment(testClass);
 
 
         deployment.addMavenDependency(
@@ -85,8 +85,10 @@ public class AbstractPushTest {
                         driver.navigate().to(contextPath);
                     }
                 })
-            .observe(new UriRequestFilter("__richfacesPushAsync"))
-            .inspect(new PushServletAssertion());
+            .group()
+                .observe(new UriRequestFilter("__richfacesPushAsync"))
+                .inspect(new PushServletAssertion())
+            .execute();
 
         waitAjax().withTimeout(5,  SECONDS).until(titleIs("message-received: 1"));
     }

@@ -19,27 +19,24 @@ public class CustomPushServletMappingTest extends AbstractPushTest {
 
     @Deployment
     public static WebArchive createDeployment() {
-        CoreDeployment deployment = createBasicDeployment();
-        
+        CoreDeployment deployment = createBasicDeployment(CustomPushServletMappingTest.class);
+
         deployment.webXml(new Function<WebAppDescriptor, WebAppDescriptor>() {
             public WebAppDescriptor apply(WebAppDescriptor webXml) {
-                return webXml
-                        .getOrCreateServlet()
+                webXml.createServlet()
                             .servletName(PushServlet.class.getSimpleName())
                             .servletClass(PushServlet.class.getName())
-                            .asyncSupported(true)
-                        .up()
-                        .getOrCreateServletMapping()
+                            .asyncSupported(true);
+                webXml.createServletMapping()
                             .servletName(PushServlet.class.getSimpleName())
-                            .urlPattern("/__custom_mapping")
-                        .up()
-                        .getOrCreateContextParam()
+                            .urlPattern("/__custom_mapping");
+                webXml.createContextParam()
                             .paramName("org.richfaces.push.handlerMapping")
-                            .paramValue("/__custom_mapping")
-                        .up();
+                            .paramValue("/__custom_mapping");
+                return webXml;
             }
         });
-        
+
         return deployment.getFinalArchive();
     }
 
