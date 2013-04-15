@@ -7,7 +7,9 @@ if (!window.RichFaces) {
      * @static
      *
      * */
-    window.RichFaces = {};
+	window.RichFaces = window.RichFaces || {};
+	var myJQuery = jQuery.noConflict();
+	RichFaces.jQuery = RichFaces.jQuery || jQuery;
 }
 
 (function(jQuery, richfaces) {
@@ -64,7 +66,7 @@ if (!window.RichFaces) {
     };
 
     // get RichFaces component object by component id or DOM element or jQuery object
-    richfaces.$ = function (source) {
+    richfaces.jQuery = function (source) {
         var element = richfaces.getDomElement(source);
 
         if (element) {
@@ -76,9 +78,9 @@ if (!window.RichFaces) {
     /**
      * jQuery selector ":editable" which selects only input elements which can be edited, are visible and enabled
      */
-    $.extend($.expr[':'], {
+    jQuery.extend(jQuery.expr[':'], {
         editable : function(element) {
-            return $(element).is(richfaces.EDITABLE_INPUT_SELECTOR);
+            return jQuery(element).is(richfaces.EDITABLE_INPUT_SELECTOR);
         }
     });
 
@@ -101,7 +103,7 @@ if (!window.RichFaces) {
 
     // find component and call his method
     richfaces.invokeMethod = function(source, method) {
-        var c = richfaces.$(source);
+        var c = richfaces.jQuery(source);
         var f;
         if (c && typeof (f = c[method]) == "function") {
             return f.apply(c, Array.prototype.slice.call(arguments, 2));
@@ -110,7 +112,7 @@ if (!window.RichFaces) {
 
     //dom cleaner
     richfaces.cleanComponent = function (source) {
-        var component = richfaces.$(source);
+        var component = richfaces.jQuery(source);
         if (component) {
             //TODO fire destroy event
             component.destroy();
@@ -133,8 +135,8 @@ if (!window.RichFaces) {
         }
         if (e) {
             // Fire a DOM cleanup event
-//            $(e).trigger("beforeDomClean" + RichFaces.Event.RICH_NAMESPACE);
-            $(e).trigger("beforeDomClean" + ".RICH");
+//            jQuery(e).trigger("beforeDomClean" + RichFaces.Event.RICH_NAMESPACE);
+            jQuery(e).trigger("beforeDomClean" + ".RICH");
             var elements = e.getElementsByTagName("*");
             if (elements.length) {
                 jQuery.each(elements, function(index) {
@@ -144,8 +146,8 @@ if (!window.RichFaces) {
             }
             richfaces.cleanComponent(e);
             jQuery.cleanData([e]);
-//            $(e).trigger("afterDomClean" + RichFaces.Event.RICH_NAMESPACE);
-            $(e).trigger("afterDomClean" + ".RICH");
+//            jQuery(e).trigger("afterDomClean" + RichFaces.Event.RICH_NAMESPACE);
+            jQuery(e).trigger("afterDomClean" + ".RICH");
         }
     };
 
@@ -584,7 +586,7 @@ if (!window.RichFaces) {
         jsf.ajax.request = function request(source, event, options) {
 
             // build parameters, taking options.rfExt into consideration
-            var parameters = $.extend({}, options);
+            var parameters = jQuery.extend({}, options);
             parameters.rfExt = null;
 
             var eventHandlers;
@@ -650,7 +652,7 @@ if (!window.RichFaces) {
             // for all RichFaces.ajax requests
             if (context.render == '@component') {
                 // get list of IDs updated on the server - replaces @render option which is normally available on client
-                context.render = $("extension[id='org.richfaces.extension'] render", request.responseXML).text();
+                context.render = jQuery("extension[id='org.richfaces.extension'] render", request.responseXML).text();
             }
 
             return jsfAjaxResponse(request, context);
@@ -662,12 +664,12 @@ if (!window.RichFaces) {
      * Otherwise returns sourceElement if RichFaces component root can't be located.
      */
     var searchForComponentRootOrReturn = function(sourceElement) {
-        if (sourceElement.id && !richfaces.$(sourceElement)) {
+        if (sourceElement.id && !richfaces.jQuery(sourceElement)) {
             var parentElement = false;
             jQuery(sourceElement).parents().each(function() {
                 if (this.id && sourceElement.id.indexOf(this.id) == 0) { // otherwise parent element is definitely not JSF component
                     var suffix = sourceElement.id.substring(this.id.length); // extract suffix
-                    if (suffix.match(/^[a-zA-Z]*$/) && richfaces.$(this)) {
+                    if (suffix.match(/^[a-zA-Z]*$/) && richfaces.jQuery(this)) {
                         parentElement = this;
                         return false;
                     }
@@ -691,10 +693,10 @@ if (!window.RichFaces) {
     };
     
     var getFormElement = function(sourceElement) {
-        if ($(sourceElement).is('form')) {
+        if (jQuery(sourceElement).is('form')) {
             return source;
         } else {
-            return $('form').has(sourceElement).get(0);
+            return jQuery('form').has(sourceElement).get(0);
         }
     };
     
@@ -747,4 +749,8 @@ if (!window.RichFaces) {
     } else {
         window.attachEvent("onunload", richfaces.cleanDom);
     }
-}(jQuery, RichFaces));
+}(RichFaces.jQuery, RichFaces));
+
+
+
+RichFaces.jQuery = myJQuery;
