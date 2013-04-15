@@ -10,7 +10,7 @@ if (!window.RichFaces) {
     window.RichFaces = {};
 }
 
-(function(jQuery, richfaces) {
+(function($, richfaces) {
 
     richfaces.RICH_CONTAINER = "rf";
     
