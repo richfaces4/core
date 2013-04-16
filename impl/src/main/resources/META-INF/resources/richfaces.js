@@ -692,7 +692,7 @@ if (!window.RichFaces) {
     
     var getFormElement = function(sourceElement) {
         if ($(sourceElement).is('form')) {
-            return source;
+            return sourceElement;
         } else {
             return $('form').has(sourceElement).get(0);
         }
