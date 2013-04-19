@@ -7,9 +7,10 @@ if (!window.RichFaces) {
      * @static
      *
      * */
-	window.RichFaces = window.RichFaces || {};
+    window.RichFaces = window.RichFaces || {};
 	var myJQuery = jQuery.noConflict();
 	RichFaces.jQuery = RichFaces.jQuery || jQuery;
+	RichFaces.jQuery = myJQuery;
 }
 
 (function(jQuery, richfaces) {
@@ -66,7 +67,7 @@ if (!window.RichFaces) {
     };
 
     // get RichFaces component object by component id or DOM element or jQuery object
-    richfaces.jQuery = function (source) {
+    richfaces.$ = function (source) {
         var element = richfaces.getDomElement(source);
 
         if (element) {
@@ -103,7 +104,7 @@ if (!window.RichFaces) {
 
     // find component and call his method
     richfaces.invokeMethod = function(source, method) {
-        var c = richfaces.jQuery(source);
+        var c = richfaces.$(source);
         var f;
         if (c && typeof (f = c[method]) == "function") {
             return f.apply(c, Array.prototype.slice.call(arguments, 2));
@@ -112,7 +113,7 @@ if (!window.RichFaces) {
 
     //dom cleaner
     richfaces.cleanComponent = function (source) {
-        var component = richfaces.jQuery(source);
+        var component = richfaces.$(source);
         if (component) {
             //TODO fire destroy event
             component.destroy();
@@ -664,12 +665,12 @@ if (!window.RichFaces) {
      * Otherwise returns sourceElement if RichFaces component root can't be located.
      */
     var searchForComponentRootOrReturn = function(sourceElement) {
-        if (sourceElement.id && !richfaces.jQuery(sourceElement)) {
+        if (sourceElement.id && !richfaces.$(sourceElement)) {
             var parentElement = false;
             jQuery(sourceElement).parents().each(function() {
                 if (this.id && sourceElement.id.indexOf(this.id) == 0) { // otherwise parent element is definitely not JSF component
                     var suffix = sourceElement.id.substring(this.id.length); // extract suffix
-                    if (suffix.match(/^[a-zA-Z]*$/) && richfaces.jQuery(this)) {
+                    if (suffix.match(/^[a-zA-Z]*$/) && richfaces.$(this)) {
                         parentElement = this;
                         return false;
                     }
@@ -694,7 +695,7 @@ if (!window.RichFaces) {
     
     var getFormElement = function(sourceElement) {
         if (jQuery(sourceElement).is('form')) {
-            return source;
+            return sourceElement;
         } else {
             return jQuery('form').has(sourceElement).get(0);
         }
@@ -749,8 +750,4 @@ if (!window.RichFaces) {
     } else {
         window.attachEvent("onunload", richfaces.cleanDom);
     }
-}(RichFaces.jQuery, RichFaces));
-
-
-
-RichFaces.jQuery = myJQuery;
+}(jQuery, RichFaces));
