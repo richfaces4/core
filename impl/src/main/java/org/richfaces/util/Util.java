@@ -233,8 +233,7 @@ public final class Util {
         byte[] objectArray = decodeBytesData(encodedData);
 
         try {
-            ObjectInputStream in = new ObjectInputStreamImpl(new ByteArrayInputStream(objectArray));
-
+            ObjectInputStream in = new LookAheadObjectInputStream(new ByteArrayInputStream(objectArray));
             return in.readObject();
         } catch (StreamCorruptedException e) {
             RESOURCE_LOGGER.error(Messages.getMessage(Messages.STREAM_CORRUPTED_ERROR), e);
