@@ -21,6 +21,9 @@
  **/
 package org.richfaces.util;
 
+import org.richfaces.log.Logger;
+import org.richfaces.log.RichfacesLogger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidClassException;
@@ -40,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author <a href="http://community.jboss.org/people/bleathem">Brian Leathem</a>
  */
 public class LookAheadObjectInputStream extends ObjectInputStream {
+    private static final Logger LOGGER = RichfacesLogger.APPLICATION.getLogger();
     private static final Map<String, Class<?>> PRIMITIVE_TYPES = new HashMap<String, Class<?>>(9, 1.0F);
     private static Set<Class> whitelistBaseClasses = new HashSet<Class>();
     private static Set<String> whitelistClassNameCache = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
@@ -141,7 +145,9 @@ public class LookAheadObjectInputStream extends ObjectInputStream {
                 Class<?> baseClass = Class.forName(baseClassName);
                 whitelistBaseClasses.add(baseClass);
             } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Unable to load whiteList class " + baseClassName, e);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.debug(e);
+                }
             }
         }
     }
