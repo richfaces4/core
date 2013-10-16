@@ -136,7 +136,7 @@ public class LookAheadObjectInputStream extends ObjectInputStream {
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    throw new RuntimeException("Error closing the ResourceBuilder.properties file", e);
+                    throw new RuntimeException("Error closing the resource-serialization.properties file", e);
                 }
             }
         }
