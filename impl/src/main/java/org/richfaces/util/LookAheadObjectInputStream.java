@@ -62,13 +62,21 @@ public class LookAheadObjectInputStream extends ObjectInputStream {
         whitelistClassNameCache.add(new Object[0].getClass().getName());
         whitelistClassNameCache.add(new String[0].getClass().getName());
         whitelistClassNameCache.add(new Boolean[0].getClass().getName());
+        whitelistClassNameCache.add(new boolean[0].getClass().getName());
         whitelistClassNameCache.add(new Byte[0].getClass().getName());
+        whitelistClassNameCache.add(new byte[0].getClass().getName());
         whitelistClassNameCache.add(new Character[0].getClass().getName());
+        whitelistClassNameCache.add(new char[0].getClass().getName());
         whitelistClassNameCache.add(new Short[0].getClass().getName());
+        whitelistClassNameCache.add(new short[0].getClass().getName());
         whitelistClassNameCache.add(new Integer[0].getClass().getName());
+        whitelistClassNameCache.add(new int[0].getClass().getName());
         whitelistClassNameCache.add(new Long[0].getClass().getName());
+        whitelistClassNameCache.add(new long[0].getClass().getName());
         whitelistClassNameCache.add(new Float[0].getClass().getName());
+        whitelistClassNameCache.add(new float[0].getClass().getName());
         whitelistClassNameCache.add(new Double[0].getClass().getName());
+        whitelistClassNameCache.add(new double[0].getClass().getName());
         whitelistClassNameCache.add(new Void[0].getClass().getName());
 
         whitelistBaseClasses.add(String.class);
