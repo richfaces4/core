@@ -1,6 +1,6 @@
 package org.richfaces.integration.javascript;
 
-import static org.jboss.arquillian.graphene.Graphene.guardXhr;
+import static org.jboss.arquillian.graphene.Graphene.guardAjax;
 import static org.jboss.arquillian.warp.jsf.Phase.INVOKE_APPLICATION;
 import static org.junit.Assert.assertEquals;
 
@@ -12,7 +12,7 @@ import org.ajax4jsf.javascript.JSLiteral;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.enricher.findby.FindBy;
+import org.openqa.selenium.support.FindBy;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.arquillian.warp.Activity;
@@ -64,7 +64,7 @@ public class JavaScriptServiceAjaxTest {
         Warp
             .initiate(new Activity() {
                 public void perform() {
-                    guardXhr(richfacesAjax).click();
+                    guardAjax(richfacesAjax).click();
                 }
             })
             .inspect(new AddScript());
@@ -79,7 +79,7 @@ public class JavaScriptServiceAjaxTest {
         Warp
             .initiate(new Activity() {
                 public void perform() {
-                    guardXhr(jsfAjax).click();
+                    guardAjax(jsfAjax).click();
                 }
             })
             .inspect(new AddScript());

@@ -152,7 +152,7 @@ import org.richfaces.resource.external.MojarraExternalResourceTracker;
 import org.richfaces.resource.external.MyFacesExternalResourceTracker;
 import org.richfaces.shrinkwrap.descriptor.PropertiesAsset;
 import org.richfaces.skin.SkinFactory;
-import org.richfaces.util.ObjectInputStreamImpl;
+import org.richfaces.util.LookAheadObjectInputStream;
 import org.richfaces.util.PropertiesUtil;
 import org.richfaces.util.RequestStateManager;
 import org.richfaces.util.URLUtils;
@@ -246,7 +246,7 @@ public class CoreDeployment extends Deployment {
     public CoreDeployment withUtilities() {
         archive().addClasses(Util.class, PropertiesUtil.class, URLUtils.class);
         archive().addClasses(RequestStateManager.class);
-        archive().addClasses(URLToStreamHelper.class, ObjectInputStreamImpl.class);
+        archive().addClasses(URLToStreamHelper.class, LookAheadObjectInputStream.class);
         archive().addClasses(ELUtils.class, ConstantValueExpression.class);
         return this;
     }
