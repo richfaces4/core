@@ -6,6 +6,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.warp.WarpTest;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.descriptor.api.webapp30.WebAppDescriptor;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.richfaces.integration.CoreDeployment;
@@ -13,6 +14,7 @@ import org.richfaces.webapp.PushServlet;
 
 import com.google.common.base.Function;
 
+@Ignore
 @RunWith(Arquillian.class)
 @WarpTest
 public class CustomPushServletMappingTest extends AbstractPushTest {
