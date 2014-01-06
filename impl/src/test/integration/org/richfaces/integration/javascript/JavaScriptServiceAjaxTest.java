@@ -12,7 +12,7 @@ import org.ajax4jsf.javascript.JSLiteral;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.openqa.selenium.support.FindBy;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.arquillian.warp.Activity;
@@ -25,9 +25,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
 import org.richfaces.integration.CoreDeployment;
 import org.richfaces.javascript.JavaScriptService;
 import org.richfaces.shrinkwrap.descriptor.FaceletAsset;
+
+import com.google.common.base.Predicate;
 
 @RunWith(Arquillian.class)
 @WarpTest
@@ -69,7 +72,7 @@ public class JavaScriptServiceAjaxTest {
             })
             .inspect(new AddScript());
 
-        assertEquals("executed", driver.getTitle());
+        waitUntilPageTitleChanges();
     }
 
     @Test
@@ -83,11 +86,18 @@ public class JavaScriptServiceAjaxTest {
                 }
             })
             .inspect(new AddScript());
-
-        assertEquals("executed", driver.getTitle());
+        
+        waitUntilPageTitleChanges();
     }
 
-
+    private void waitUntilPageTitleChanges() {
+        Graphene.waitAjax().until(new Predicate<WebDriver>() {
+            public boolean apply(WebDriver browser) {
+                return "executed".equals(driver.getTitle());
+            }
+        });
+    }
+    
 
     private static void addIndexPage(CoreDeployment deployment) {
         FaceletAsset p = new FaceletAsset();
