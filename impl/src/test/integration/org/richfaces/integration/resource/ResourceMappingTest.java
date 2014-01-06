@@ -29,6 +29,7 @@ import org.richfaces.shrinkwrap.descriptor.PropertiesAsset;
 
 @RunWith(Arquillian.class)
 @WarpTest
+@RunAsClient
 public class ResourceMappingTest {
 
     @Drone
@@ -60,6 +61,8 @@ public class ResourceMappingTest {
                 + "<h:outputScript name=\"part2.js\" />");
 
         deployment.withResourceHandler();
+        
+        deployment.addMavenDependency("com.google.guava:guava");
 
         deployment.archive()
                 /** classes */
@@ -85,7 +88,6 @@ public class ResourceMappingTest {
     }
 
     @Test
-    @RunAsClient
     public void test_stylesheet_resource_relocation() {
 
         driver.navigate().to(contextPath + "relocation.jsf");
@@ -97,7 +99,6 @@ public class ResourceMappingTest {
     }
 
     @Test
-    @RunAsClient
     public void test_stylesheet_resource_aggregation() {
 
         driver.navigate().to(contextPath + "aggregation.jsf");
@@ -113,7 +114,6 @@ public class ResourceMappingTest {
     }
     
     @Test
-    @RunAsClient
     public void test_javascript_resource_aggregation() {
 
         driver.navigate().to(contextPath + "javaScriptAggregation.jsf");

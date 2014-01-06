@@ -1,7 +1,5 @@
 package org.richfaces.integration.partialViewContext;
 
-import static org.junit.Assert.assertEquals;
-
 import java.net.URL;
 
 import javax.faces.context.PartialViewContext;
@@ -9,6 +7,7 @@ import javax.faces.context.PartialViewContext;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.arquillian.warp.Activity;
@@ -29,6 +28,8 @@ import org.richfaces.context.ExtendedPartialViewContext;
 import org.richfaces.integration.CoreDeployment;
 import org.richfaces.shrinkwrap.descriptor.FaceletAsset;
 
+import com.google.common.base.Predicate;
+
 /**
  * Tests a4j:commandButton processing using {@link PartialViewContext}. (RF-12145)
  */
@@ -42,10 +43,10 @@ public class RenderAllTest {
 
     @ArquillianResource
     URL contextPath;
-
+    
     @FindBy(css = "input[type=submit]")
     WebElement button;
-
+    
     @Deployment
     public static WebArchive createDeployment() {
         CoreDeployment deployment = new CoreDeployment(RenderAllTest.class);
@@ -84,7 +85,11 @@ public class RenderAllTest {
             }
         });
 
-        assertEquals("script should be executed", "script executed", browser.getTitle());
+        Graphene.waitAjax().until(new Predicate<WebDriver>() {
+            public boolean apply(WebDriver driver) {
+                return "script executed".equals(browser.getTitle());
+            }
+        });
     }
 
     private static void addIndexPage(CoreDeployment deployment) {
