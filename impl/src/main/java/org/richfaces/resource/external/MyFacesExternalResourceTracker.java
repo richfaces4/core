@@ -21,7 +21,7 @@
  */
 package org.richfaces.resource.external;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -36,15 +36,35 @@ import org.richfaces.resource.ResourceKey;
  * Tracks what external resources are renderered to the page (specific for MyFaces)
  *
  * @author Lukas Fryc
+ * @author Sebastian Cramer
  */
 public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
 
-    private Class<?> resourceUtilsClass;
+    private final Method isRenderedStylesheet;
+    private final Method isRenderedScript;
+    private final Method markStylesheetAsRendered;
+    private final Method markScriptAsRendered;
 
     private static final Logger LOG = RichfacesLogger.RESOURCE.getLogger();
 
     public MyFacesExternalResourceTracker(Class<?> resourceUtilsClass) {
-        this.resourceUtilsClass = resourceUtilsClass;
+        try {
+            isRenderedStylesheet = resourceUtilsClass.getMethod("isRenderedStylesheet", FacesContext.class, String.class,
+                String.class);
+            isRenderedScript = resourceUtilsClass.getMethod("isRenderedScript", FacesContext.class, String.class, String.class);
+            markStylesheetAsRendered = resourceUtilsClass.getMethod("markStylesheetAsRendered", FacesContext.class,
+                String.class, String.class);
+            markScriptAsRendered = resourceUtilsClass.getMethod("markScriptAsRendered", FacesContext.class, String.class,
+                String.class);
+        } catch (Exception e) {
+            MyFacesExternalResourceTracker.handleException(e);
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
+    private static void handleException(Exception e) {
+        // none of these exceptions should occure in real life.
+        LOG.error("error while delegating resource handling to myfaces impl", e);
     }
 
     /*
@@ -59,24 +79,15 @@ public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
 
         try {
             if (MimeType.STYLESHEET.contains(mimeType)) {
-                return (Boolean) resourceUtilsClass.getMethod("isRenderedStylesheet", FacesContext.class, String.class,
-                    String.class).invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+                return (Boolean) isRenderedStylesheet.invoke(null, facesContext, resourceKey.getLibraryName(),
+                    resourceKey.getResourceName());
             } else if (MimeType.SCRIPT.contains(mimeType)) {
-                return (Boolean) resourceUtilsClass.getMethod("isRenderedScript", FacesContext.class, String.class,
-                    String.class).invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+                return (Boolean) isRenderedScript.invoke(null, facesContext, resourceKey.getLibraryName(),
+                    resourceKey.getResourceName());
             }
-        } catch (IllegalAccessException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
-        } catch (IllegalArgumentException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
-        } catch (InvocationTargetException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
-        } catch (NoSuchMethodException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
-        } catch (SecurityException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (Exception e) {
+            MyFacesExternalResourceTracker.handleException(e);
         }
-
         return false;
     }
 
@@ -92,22 +103,13 @@ public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
 
         try {
             if (MimeType.STYLESHEET.contains(mimeType)) {
-                resourceUtilsClass.getMethod("markStylesheetAsRendered", FacesContext.class, String.class, String.class)
+                markStylesheetAsRendered
                     .invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
             } else if (MimeType.SCRIPT.contains(mimeType)) {
-                resourceUtilsClass.getMethod("markScriptAsRendered", FacesContext.class, String.class, String.class).invoke(
-                    null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+                markScriptAsRendered.invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
             }
-        } catch (IllegalAccessException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
-        } catch (IllegalArgumentException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
-        } catch (InvocationTargetException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
-        } catch (NoSuchMethodException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
-        } catch (SecurityException e) {
-            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (Exception e) {
+            MyFacesExternalResourceTracker.handleException(e);
         }
     }
 
