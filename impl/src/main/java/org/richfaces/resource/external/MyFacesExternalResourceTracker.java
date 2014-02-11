@@ -21,13 +21,15 @@
  */
 package org.richfaces.resource.external;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Set;
 
 import javax.faces.context.FacesContext;
 
-import org.apache.myfaces.shared.renderkit.html.util.ResourceUtils;
 import org.richfaces.application.ServiceTracker;
+import org.richfaces.log.Logger;
+import org.richfaces.log.RichfacesLogger;
 import org.richfaces.resource.ResourceKey;
 
 /**
@@ -36,6 +38,14 @@ import org.richfaces.resource.ResourceKey;
  * @author Lukas Fryc
  */
 public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
+
+    private Class<?> resourceUtilsClass;
+
+    private static final Logger LOG = RichfacesLogger.RESOURCE.getLogger();
+
+    public MyFacesExternalResourceTracker(Class<?> resourceUtilsClass) {
+        this.resourceUtilsClass = resourceUtilsClass;
+    }
 
     /*
      * (non-Javadoc)
@@ -47,11 +57,24 @@ public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
     public boolean isResourceRenderered(FacesContext facesContext, ResourceKey resourceKey) {
         final String mimeType = facesContext.getExternalContext().getMimeType(resourceKey.getResourceName());
 
-        if (MimeType.STYLESHEET.contains(mimeType)) {
-            return ResourceUtils
-                    .isRenderedStylesheet(facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
-        } else if (MimeType.SCRIPT.contains(mimeType)) {
-            return ResourceUtils.isRenderedScript(facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+        try {
+            if (MimeType.STYLESHEET.contains(mimeType)) {
+                return (Boolean) resourceUtilsClass.getMethod("isRenderedStylesheet", FacesContext.class, String.class,
+                    String.class).invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+            } else if (MimeType.SCRIPT.contains(mimeType)) {
+                return (Boolean) resourceUtilsClass.getMethod("isRenderedScript", FacesContext.class, String.class,
+                    String.class).invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+            }
+        } catch (IllegalAccessException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (IllegalArgumentException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (InvocationTargetException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (NoSuchMethodException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (SecurityException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
         }
 
         return false;
@@ -67,10 +90,24 @@ public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
     public void markResourceRendered(FacesContext facesContext, ResourceKey resourceKey) {
         final String mimeType = facesContext.getExternalContext().getMimeType(resourceKey.getResourceName());
 
-        if (MimeType.STYLESHEET.contains(mimeType)) {
-            ResourceUtils.markStylesheetAsRendered(facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
-        } else if (MimeType.SCRIPT.contains(mimeType)) {
-            ResourceUtils.markScriptAsRendered(facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+        try {
+            if (MimeType.STYLESHEET.contains(mimeType)) {
+                resourceUtilsClass.getMethod("markStylesheetAsRendered", FacesContext.class, String.class, String.class)
+                    .invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+            } else if (MimeType.SCRIPT.contains(mimeType)) {
+                resourceUtilsClass.getMethod("markScriptAsRendered", FacesContext.class, String.class, String.class).invoke(
+                    null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+            }
+        } catch (IllegalAccessException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (IllegalArgumentException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (InvocationTargetException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (NoSuchMethodException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
+        } catch (SecurityException e) {
+            LOG.error("error while delegating resource handling to myfaces impl", e);
         }
     }
 
@@ -84,7 +121,7 @@ public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
     @Override
     public void markExternalResourceRendered(FacesContext facesContext, ExternalResource resource) {
         ExternalStaticResourceFactory externalStaticResourceFactory = ServiceTracker
-                .getService(ExternalStaticResourceFactory.class);
+            .getService(ExternalStaticResourceFactory.class);
 
         ResourceKey originalResourceKey = ResourceKey.create(resource);
         Set<ResourceKey> resourcesKeys = externalStaticResourceFactory.getResourcesForLocation(resource.getExternalLocation());
