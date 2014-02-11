@@ -21,21 +21,51 @@
  */
 package org.richfaces.resource.external;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
 
 import javax.faces.context.FacesContext;
 
-import org.apache.myfaces.shared.renderkit.html.util.ResourceUtils;
 import org.richfaces.application.ServiceTracker;
+import org.richfaces.log.Logger;
+import org.richfaces.log.RichfacesLogger;
 import org.richfaces.resource.ResourceKey;
 
 /**
  * Tracks what external resources are renderered to the page (specific for MyFaces)
  *
  * @author Lukas Fryc
+ * @author Sebastian Cramer
  */
 public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
+
+    private final Method isRenderedStylesheet;
+    private final Method isRenderedScript;
+    private final Method markStylesheetAsRendered;
+    private final Method markScriptAsRendered;
+
+    private static final Logger LOG = RichfacesLogger.RESOURCE.getLogger();
+
+    public MyFacesExternalResourceTracker(Class<?> resourceUtilsClass) {
+        try {
+            isRenderedStylesheet = resourceUtilsClass.getMethod("isRenderedStylesheet", FacesContext.class, String.class,
+                String.class);
+            isRenderedScript = resourceUtilsClass.getMethod("isRenderedScript", FacesContext.class, String.class, String.class);
+            markStylesheetAsRendered = resourceUtilsClass.getMethod("markStylesheetAsRendered", FacesContext.class,
+                String.class, String.class);
+            markScriptAsRendered = resourceUtilsClass.getMethod("markScriptAsRendered", FacesContext.class, String.class,
+                String.class);
+        } catch (Exception e) {
+            MyFacesExternalResourceTracker.handleException(e);
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
+    private static void handleException(Exception e) {
+        // none of these exceptions should occure in real life.
+        LOG.error("error while delegating resource handling to myfaces impl", e);
+    }
 
     /*
      * (non-Javadoc)
@@ -47,13 +77,17 @@ public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
     public boolean isResourceRenderered(FacesContext facesContext, ResourceKey resourceKey) {
         final String mimeType = facesContext.getExternalContext().getMimeType(resourceKey.getResourceName());
 
-        if (MimeType.STYLESHEET.contains(mimeType)) {
-            return ResourceUtils
-                    .isRenderedStylesheet(facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
-        } else if (MimeType.SCRIPT.contains(mimeType)) {
-            return ResourceUtils.isRenderedScript(facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+        try {
+            if (MimeType.STYLESHEET.contains(mimeType)) {
+                return (Boolean) isRenderedStylesheet.invoke(null, facesContext, resourceKey.getLibraryName(),
+                    resourceKey.getResourceName());
+            } else if (MimeType.SCRIPT.contains(mimeType)) {
+                return (Boolean) isRenderedScript.invoke(null, facesContext, resourceKey.getLibraryName(),
+                    resourceKey.getResourceName());
+            }
+        } catch (Exception e) {
+            MyFacesExternalResourceTracker.handleException(e);
         }
-
         return false;
     }
 
@@ -67,10 +101,15 @@ public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
     public void markResourceRendered(FacesContext facesContext, ResourceKey resourceKey) {
         final String mimeType = facesContext.getExternalContext().getMimeType(resourceKey.getResourceName());
 
-        if (MimeType.STYLESHEET.contains(mimeType)) {
-            ResourceUtils.markStylesheetAsRendered(facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
-        } else if (MimeType.SCRIPT.contains(mimeType)) {
-            ResourceUtils.markScriptAsRendered(facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+        try {
+            if (MimeType.STYLESHEET.contains(mimeType)) {
+                markStylesheetAsRendered
+                    .invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+            } else if (MimeType.SCRIPT.contains(mimeType)) {
+                markScriptAsRendered.invoke(null, facesContext, resourceKey.getLibraryName(), resourceKey.getResourceName());
+            }
+        } catch (Exception e) {
+            MyFacesExternalResourceTracker.handleException(e);
         }
     }
 
@@ -84,7 +123,7 @@ public class MyFacesExternalResourceTracker implements ExternalResourceTracker {
     @Override
     public void markExternalResourceRendered(FacesContext facesContext, ExternalResource resource) {
         ExternalStaticResourceFactory externalStaticResourceFactory = ServiceTracker
-                .getService(ExternalStaticResourceFactory.class);
+            .getService(ExternalStaticResourceFactory.class);
 
         ResourceKey originalResourceKey = ResourceKey.create(resource);
         Set<ResourceKey> resourcesKeys = externalStaticResourceFactory.getResourcesForLocation(resource.getExternalLocation());
