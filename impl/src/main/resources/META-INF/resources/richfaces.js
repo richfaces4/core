@@ -508,7 +508,13 @@ if (!window.RichFaces) {
 
     var createEventHandler = function(handlerCode) {
         if (handlerCode) {
-            return new Function("event", handlerCode);
+            // ensure safe execution, errors would cause rf.queue to hang up (RF-12132)
+            var safeHandlerCode = "try {" +
+                    handlerCode + 
+                "} catch (e) {" +
+                    "window.RichFaces.log.error('Error in method execution: ' + e.message)" +
+                "}";
+            return new Function("event", safeHandlerCode);
         }
 
         return null;
