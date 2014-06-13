@@ -76,9 +76,9 @@ if (!window.RichFaces) {
     /**
      * jQuery selector ":editable" which selects only input elements which can be edited, are visible and enabled
      */
-    $.extend($.expr[':'], {
+    jQuery.extend(jQuery.expr[':'], {
         editable : function(element) {
-            return $(element).is(richfaces.EDITABLE_INPUT_SELECTOR);
+            return jQuery(element).is(richfaces.EDITABLE_INPUT_SELECTOR);
         }
     });
 
@@ -134,7 +134,7 @@ if (!window.RichFaces) {
         if (e) {
             // Fire a DOM cleanup event
 //            $(e).trigger("beforeDomClean" + RichFaces.Event.RICH_NAMESPACE);
-            $(e).trigger("beforeDomClean" + ".RICH");
+            jQuery(e).trigger("beforeDomClean" + ".RICH");
             var elements = e.getElementsByTagName("*");
             if (elements.length) {
                 jQuery.each(elements, function(index) {
@@ -145,7 +145,7 @@ if (!window.RichFaces) {
             richfaces.cleanComponent(e);
             jQuery.cleanData([e]);
 //            $(e).trigger("afterDomClean" + RichFaces.Event.RICH_NAMESPACE);
-            $(e).trigger("afterDomClean" + ".RICH");
+            jQuery(e).trigger("afterDomClean" + ".RICH");
         }
     };
 
@@ -590,7 +590,7 @@ if (!window.RichFaces) {
         jsf.ajax.request = function request(source, event, options) {
 
             // build parameters, taking options.rfExt into consideration
-            var parameters = $.extend({}, options);
+            var parameters = jQuery.extend({}, options);
             parameters.rfExt = null;
 
             var eventHandlers;
@@ -656,7 +656,7 @@ if (!window.RichFaces) {
             // for all RichFaces.ajax requests
             if (context.render == '@component') {
                 // get list of IDs updated on the server - replaces @render option which is normally available on client
-                context.render = $("extension[id='org.richfaces.extension'] render", request.responseXML).text();
+                context.render = jQuery("extension[id='org.richfaces.extension'] render", request.responseXML).text();
             }
 
             return jsfAjaxResponse(request, context);
@@ -697,10 +697,10 @@ if (!window.RichFaces) {
     };
     
     var getFormElement = function(sourceElement) {
-        if ($(sourceElement).is('form')) {
+        if (jQuery(sourceElement).is('form')) {
             return sourceElement;
         } else {
-            return $('form').has(sourceElement).get(0);
+            return jQuery('form').has(sourceElement).get(0);
         }
     };
     

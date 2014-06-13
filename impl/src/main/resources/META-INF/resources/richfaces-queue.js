@@ -71,7 +71,7 @@
         var QueueEntry = function(queue, source, event, options) {
             this.queue = queue;
             this.source = source;
-            this.options = $.extend({}, options || {});
+            this.options = jQuery.extend({}, options || {});
             this.queueOptions = {}
             var id;
 
@@ -85,7 +85,7 @@
                 var element = richfaces.getDomElement(source);
                 var form;
                 if (element) {
-                    element = $(element).closest("form");
+                    element = jQuery(element).closest("form");
                     if (element.length > 0) {
                         form = element.get(0);
                     }
@@ -99,13 +99,13 @@
             if (id) {
                 this.queueOptions = defaultQueueOptions[id] || {};
                 if (this.queueOptions.queueId) {
-                    this.queueOptions = $.extend({}, (defaultQueueOptions[this.queueOptions.queueId] || {}), this.queueOptions);
+                    this.queueOptions = jQuery.extend({}, (defaultQueueOptions[this.queueOptions.queueId] || {}), this.queueOptions);
                 } else {
                     // TODO: clean duplicated code
                     var element = richfaces.getDomElement(source);
                     var form;
                     if (element) {
-                        element = $(element).closest("form");
+                        element = jQuery(element).closest("form");
                         if (element.length > 0) {
                             form = element.get(0);
                         }
@@ -116,7 +116,7 @@
                         id = DEFAULT_QUEUE_ID;
                     }
                     if (id) {
-                        this.queueOptions = $.extend({}, (defaultQueueOptions[id] || {}), this.queueOptions);
+                        this.queueOptions = jQuery.extend({}, (defaultQueueOptions[id] || {}), this.queueOptions);
                     }
                 }
             }
@@ -132,14 +132,14 @@
             }
 
             // copy of event should be created otherwise IE will fail
-            this.event = $.extend({}, event);
+            this.event = jQuery.extend({}, event);
 
             //requestGroupingId is mutable, thus we need special field for it
             this.requestGroupingId = this.queueOptions.requestGroupingId;
             this.eventsCount = 1;
         };
 
-        $.extend(QueueEntry.prototype, {
+        jQuery.extend(QueueEntry.prototype, {
                 // now unused functions: ondrop, clearEntry
                 isIgnoreDupResponses: function() {
                     return this.queueOptions.ignoreDupResponses;
@@ -463,7 +463,7 @@
                     }
                 } else if (tid == "object") {
                     // first parameter is hash with queue names and options
-                    $.extend(defaultQueueOptions, id);
+                    jQuery.extend(defaultQueueOptions, id);
                 }
                 return richfaces.queue;
             },
