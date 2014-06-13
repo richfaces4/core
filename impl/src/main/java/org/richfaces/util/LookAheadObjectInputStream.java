@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,6 +85,7 @@ public class LookAheadObjectInputStream extends ObjectInputStream {
         whitelistBaseClasses.add(Byte.class);
         whitelistBaseClasses.add(Character.class);
         whitelistBaseClasses.add(Number.class);
+        whitelistBaseClasses.add(Collection.class);
 
         loadWhitelist();
     }
