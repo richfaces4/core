@@ -43,9 +43,11 @@ RichFaces.QUnit.run(function() {
 
         QUnit.stop();
         setTimeout(function() {
+            // Let the test run for 500 milliseconds, and check that only one Ajax request is done.
+            // If the Ajax request of the second click had not been removed, we would have had 2 requests and 2 responses.
             equal(numberOfAjaxRequests, 1);
             equal(numberOfAjaxResponses, 1);
             QUnit.start();
-        }, 100);
+        }, 500);
     });
 });
