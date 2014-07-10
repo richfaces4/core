@@ -255,7 +255,8 @@
                 entry = items[0];
                 var element = richfaces.getDomElement(entry.source);
                 if (element == null || $(element).closest("form").length == 0) {
-                    items.shift();
+                    var removedEntry = items.shift();
+                    removedEntry.stopTimer();
                     richfaces.log.debug("richfaces.queue: removing stale entry from the queue (source element: " + element + ")");
                 } else {
                     foundValidEntry = true;
